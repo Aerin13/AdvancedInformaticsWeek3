@@ -65,6 +65,9 @@ df = pd.read_sql("select cyl, gear, avg(mpg) from mtcars group by cyl, gear", co
 df.head()
 ```
 
+```{r}
+list.files(pattern="*.sqlite3")
+```
 
 
 
