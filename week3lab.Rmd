@@ -1,0 +1,74 @@
+---
+title: "Skylar Wyant - Week 3 Lab"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+use_python("c:\\programdata\\anaconda3", required = TRUE)
+py_run_string("import os as os")
+py_run_string("os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/programdata/Anaconda3/Library/plugins/platforms'")
+```
+
+```{r}
+library(printr)
+data(mtcars)
+help(mtcars)
+head(mtcars)
+aggregate(mpg ~ cyl, data=mtcars, mean)
+aggregate(mpg ~ cyl + gear, data=mtcars, mean)
+library(dplyr)
+results = mtcars %>%
+    group_by(cyl) %>%
+    summarise(mean_mpg = mean(mpg))
+results
+results = mtcars %>%
+    group_by(cyl, gear) %>%
+    summarise(mean_mpg = mean(mpg))
+as.data.frame(results)
+library(dbplyr)
+# Create a connection ("con") to a database file:
+con <- DBI::dbConnect(RSQLite::SQLite(), "mtcars.sqlite3")
+# Write our data frame to the database in a table called "mtcars"
+DBI::dbWriteTable(con, "mtcars", mtcars, overwrite = TRUE)
+# Disconnect from our database
+DBI::dbDisconnect(con)
+con <- DBI::dbConnect(RSQLite::SQLite(), "mtcars.sqlite3")
+mtcars2 <- tbl(con, "mtcars")
+g = mtcars2 %>% 
+    group_by(cyl) %>%
+    summarise(mean_mpg=mean(mpg))
+g %>% show_query()
+result = g %>% collect()
+as.data.frame(result)
+```
+
+
+```{python}
+mtcars = r.mtcars
+mtcars.head()
+mtcars.groupby(['cyl'])['mpg'].mean()
+mtcars.groupby(['cyl', 'gear'])['mpg'].mean()
+import sqlite3 # Built into the Python language!
+con = sqlite3.connect("mtcars_from_pandas.sqlite3")
+# Add our data frame to the mtcars table in the database
+mtcars.to_sql("mtcars", con, if_exists = 'replace')
+con.close()
+import pandas as pd
+con = sqlite3.connect("mtcars_from_pandas.sqlite3")
+df = pd.read_sql("select * from mtcars", con)
+df.head()
+df = pd.read_sql("select cyl, avg(mpg) from mtcars group by cyl", con)
+df.head()
+df = pd.read_sql("select cyl, gear, avg(mpg) from mtcars group by cyl, gear", con)
+df.head()
+```
+
+
+
+
+
+
+
+
